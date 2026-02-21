@@ -47,9 +47,9 @@ func main() {
     mux.Handle("/app/assets/", apiCfg.middlewareMetricsInc(http.StripPrefix("/app/assets", http.FileServer(http.Dir("./assets/")))))
 
     // custom handlers
-    mux.HandleFunc("/healthz", handleHealthz)
-    mux.HandleFunc("/metrics", apiCfg.handleMetrics)
-    mux.HandleFunc("/reset", apiCfg.handleResetMetrics)
+    mux.HandleFunc("GET /healthz", handleHealthz)
+    mux.HandleFunc("GET /metrics", apiCfg.handleMetrics)
+    mux.HandleFunc("POST /reset", apiCfg.handleResetMetrics)
     
     // serve and listen to connections
     server.ListenAndServe()

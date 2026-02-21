@@ -14,6 +14,7 @@ func main() {
 
     // handlers
     mux.Handle("/", http.FileServer(http.Dir(".")))
+    mux.Handle("/assets", http.FileServer(http.Dir("./assets/logo.png")))
     
     // serve and listen to connections
     server.ListenAndServe()

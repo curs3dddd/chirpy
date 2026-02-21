@@ -1,8 +1,15 @@
 package main
 
 import (
-    "fmt"
-    "net/http"
+	"net/http"
 )
 
-func main() {}
+func main() {
+    mux := http.NewServeMux()
+    server := &http.Server {
+        Addr:       ":8080",
+        Handler:    mux,
+    }
+
+    server.ListenAndServe()
+}

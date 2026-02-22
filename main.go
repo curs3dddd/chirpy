@@ -41,15 +41,15 @@ func main() {
         Handler:    mux,
     }
 
-    // handlers
+    // Fileserver Handlers
     apiCfg := apiConfig{}
     mux.Handle("/app/", apiCfg.middlewareMetricsInc(http.StripPrefix("/app/", http.FileServer(http.Dir(".")))))
     mux.Handle("/app/assets/", apiCfg.middlewareMetricsInc(http.StripPrefix("/app/assets", http.FileServer(http.Dir("./assets/")))))
 
-    // custom handlers
-    mux.HandleFunc("GET /healthz", handleHealthz)
-    mux.HandleFunc("GET /metrics", apiCfg.handleMetrics)
-    mux.HandleFunc("POST /reset", apiCfg.handleResetMetrics)
+    // APIs
+    mux.HandleFunc("GET /api/healthz", handleHealthz)
+    mux.HandleFunc("GET /api/metrics", apiCfg.handleMetrics)
+    mux.HandleFunc("POST /api/reset", apiCfg.handleResetMetrics)
     
     // serve and listen to connections
     server.ListenAndServe()

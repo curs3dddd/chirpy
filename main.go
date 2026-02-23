@@ -4,6 +4,7 @@ import (
 	"net/http"
     "sync/atomic"
     "fmt"
+    "encoding/json"
 )
 
 type apiConfig struct {
@@ -41,6 +42,57 @@ func handleHealthz(w http.ResponseWriter, r *http.Request) {
     w.Write([]byte("OK"))
 }
 
+func handleValidateChirp(w http.ResponseWriter, r *http.Request) {
+    w.Header().Set("Content-Type", "application/json")
+
+    type requestData struct {
+        Body string `json:"body"`
+    }
+
+    type errorResponse struct {
+        Error string `json:"error"`
+    }
+
+    type successResponse struct {
+        Valid bool `json:"valid"`
+    }
+
+    // Only allow POST
+    if r.Method != http.MethodPost {
+        w.WriteHeader(http.StatusMethodNotAllowed)
+        json.NewEncoder(w).Encode(errorResponse{
+            Error: "Method not allowed",
+        })
+        return
+    }
+
+    // Decode JSON
+    var req requestData
+    err := json.NewDecoder(r.Body).Decode(&req)
+    if err != nil {
+        w.WriteHeader(http.StatusBadRequest)
+        json.NewEncoder(w).Encode(errorResponse{
+            Error: "Invalid JSON",
+        })
+        return
+    }
+
+    // Validate length
+    if len(req.Body) > 140 {
+        w.WriteHeader(http.StatusBadRequest)
+        json.NewEncoder(w).Encode(errorResponse{
+            Error: "Chirp is too long",
+        })
+        return
+    }
+
+    // Success
+    w.WriteHeader(http.StatusOK)
+    json.NewEncoder(w).Encode(successResponse{
+        Valid: true,
+    })
+}
+
 func main() {
     // initialize the server stats
     mux := http.NewServeMux()
@@ -58,6 +110,7 @@ func main() {
     mux.HandleFunc("GET /api/healthz", handleHealthz)
     mux.HandleFunc("GET /admin/metrics", apiCfg.handleMetrics)
     mux.HandleFunc("POST /admin/reset", apiCfg.handleResetMetrics)
+    mux.HandleFunc("POST /api/validate_chirp", handleValidateChirp)
     
     // serve and listen to connections
     server.ListenAndServe()
